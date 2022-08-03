@@ -1,10 +1,11 @@
 library(rtweet)
 library(readxl)
 library(tidyverse)
-library(tidytext)
 library(quanteda)
 library(LIWCalike)
 library(syuzhet)
+library(writexl)
+library(stringr)
 
 #set
 getwd()
@@ -22,214 +23,206 @@ consumer_secret = api_secret_key,
 access_token = access_token,
 access_secret = access_token_secret)
 get_token()
-#Database creation. In this section, we're going to get all tweets from the constituyentes (specific users, not the "twitterverse"),
-#between certain time ranges (through twitters time id's). First, we enlist the users in three different objects, because de amount of tweets can be more than what
-#rtweets allows. 
-
+#Creación base de datos: recolección tuits de usuarios específicos (constituyentes) entre fechas aproximadas (con los ids). 
+#listado actualizado 2/8/2022
 usuarios1_constituyentes <- c(
-"LuisJimenezC",
-"MamaniIsabella",
-"CaroDistrito1",
-"Hugo_Gutierrez_",
-"oasishernan",
-"ErickaPortillaB",
-"jeniffermella",
-"CaroVilchesF",
-"MarielaSerey",
-"Jaime_Bassa",
-"Ma_joseOyarzun",
-"danielstingo",
-"tatiurru",
-"ValeMirandaCC",
-"BSepulvedaHales",
-"fernando_atria",
-"giovannaroa",
-"ConySchon",
-"labeasanchez",
-"MarcosBarrazaG",
-"IgnacioAchurra",
-"damabarca",
-"NicolasFernand",
-"alvinGrandon",
-"RobertoCeledonF",
-"amaya_alvez",
-"vanessahoppe21",
-"RoyoManuela",
-"AuroraDelgadoV",
-"YarelaAysen",
-"CotaSanJuan",
-"Bastianlabbed20",
-"MEQChile",
-"isabelgodoym",
-"ElisaGiustinia1",
-"gloconstituyent",
-"ericyoaoferreir",
-"MartinezHelmuth",
-"CesarUribeA",
-"rodrigo_logan",
-"CarolinaSepuD19",
-"afc073",
-"T_Pustilnick",
-"@dinoazulado_d6",
-"@LisetteVergaraR",
-"gdominguez_",
-"patriciapolitz",
-"tia_paulina_vr",
-"LorenaCesp_D23",
-"GuillermoNamor"
+  "LuisJimenezC",
+  "MamaniIsabella",
+  "CaroDistrito1",
+  "Hugo_Gutierrez_",
+  "oasishernan",
+  "ErickaPortillaB",
+  "jeniffermella",
+  "CaroVilchesF",
+  "MarielaSerey",
+  "Jaime_Bassa",
+  "coteoyarzund7",
+  "danielstingo",
+  "tatiurru",
+  "ValeMirandaCC",
+  "BSepulvedaHales",
+  "fernando_atria",
+  "giovannaroa",
+  "ConySchon",
+  "labeasanchez",
+  "MarcosBarrazaG",
+  "IgnacioAchurra",
+  "damabarca",
+  "NicolasFernand",
+  "RobertoCeledonF",
+  "amaya_alvez",
+  "vanessahoppe21",
+  "RoyoManuela",
+  "AuroraDelgadoV",
+  "YarelaAysen",
+  "CotaSanJuan",
+  "Bastianlabbed20",
+  "MEQChile",
+  "isabelgodoym",
+  "ElisaGiustinia1",
+  "gloconstituyent",
+  "ericyoaoferreir",
+  "MartinezHelmuth",
+  "CesarUribeA",
+  "rodrigo_logan",
+  "CarolinaSepuD19",
+  "afc073",
+  "T_Pustilnick",
+  "dinoazulado_d6",
+  "LisetteVergaraR",
+  "gdominguez_",
+  "patriciapolitz",
+  "tia_paulina_vr",
+  "LorenaCesp_D23",
+  "GuillermoNamor"
 )
+
 usuarios2_constituyentes <- c(
-"BottoConstituy1",
-"BenitoBaranda",
-"JuanjoMartinb",
-"JAVIERFUCHSLOC1",
-"AmpueroAdriana",
-"KawesqarSelas",
-"manuconstituye",
-"pelaovade",
-"VillenaNarbona",
-"ElsaLabrana",
-"DayyanaGonzalez",
-"CamilaZarateZ",
-"FloresMadriaga",
-"MarcoArellano29",
-"mariariveramit",
-"loreto_vallejos",
-"TiaPikachu",
-"frandistrito14",
-"alelapia",
-"medicanatyh",
-"fersalinas333",
-"FranciscaArauna",
-"LoretoVidalH",
-"Jorgeabarcaxv",
-"MaxHurtadoR",
-"cgomezcas",
-"SquellaAgustin",
-"BessyGallardoP",
-"cesarvalenz",
-"baradit",
-"PatoFdez",
-"maluchayallego",
-"RenatoGarinG",
-"Mati_Orellana_",
-"yanettcancino",
-"christianpviera",
-"Rmontero_",
-"felipeharboe",
-"cruz_carrasco",
-"barcelobiobio21",
-"fchahin",
-"PedroMunozLeiva",
-"ramonareyesp",
-"MarioVa25830274",
-"jjlalvarez",
-"tomaslaibe",
-"dbravosilva",
-"IvannaOlivares5",
-"ElisaLoncon",
-"MachiFrancisca1",
-"MillaburAdolfo",
-"NatividadLlanq3",
-"rkatrileo",
-"criordor",
-"AlvinSM15",
-"JanisMeneses_D6",
-"BacianWilfredo"
+  "BottoConstituy1",
+  "BenitoBaranda",
+  "JuanjoMartinb",
+  "JFuchslocher21",
+  "AmpueroAdriana",
+  "KawesqarSelas",
+  "manuconstituye",
+  "VillenaNarbona",
+  "ElsaLabrana",
+  "DayyanaGonzalez",
+  "CamilaZarateZ",
+  "FloresMadriaga",
+  "MarcoArellano29",
+  "mariariveramit",
+  "loreto_vallejos",
+  "TiaPikachu",
+  "frandistrito14",
+  "alelapia",
+  "medicanatyh",
+  "fersalinas333",
+  "FranciscaArauna",
+  "LoretoVidalH",
+  "Jorgeabarcaxv",
+  "MaxHurtadoR",
+  "cgomezcas",
+  #"SquellaAgustin",
+  "BessyGallardoP",
+  "cesarvalenz",
+  "baradit",
+  "PatoFdez",
+  "maluchayallego",
+  "RenatoGarinG",
+  "Mati_Orellana_",
+  "yanettcancino",
+  "christianpviera",
+  "Rmontero_",
+  "felipeharboe",
+  #"cruz_carrasco",
+  "barcelobiobio21",
+  "fchahin",
+  "pmconstituyente",
+  "ramonareyesp",
+  "MarioVa25830274",
+  "jjlalvarez",
+  "tomaslaibe",
+  "dbravosilva",
+  "IvannaOlivares5",
+  "ElisaLoncon",
+  "MachiFrancisca1",
+  "MillaburAdolfo",
+  "NatividadLlanq3",
+  "rkatrileo",
+  "criordor",
+  "AlvinSM15",
+  "JanisMeneses_D6",
+  "BacianWilfredo"
 )
-usuarios3_constituyentes<- c(
-"TiareHey",
-"mdaza_abogado",
-"PollyanaConsti1",
-"AlvaroJofre",
-"pablotoloza",
-"rvega_c",
-"ruggero_cozzi",
-"arancibialmte",
-"raulcelism",
-"bdelamaza",
-"arturozunigaj",
-"cmonckeberg",
-"tere_marinovic",
-"berfontaine",
-"conihube",
-"HernanLarrain",
-"mcubillossigall",
-"ossandon_d12",
-"Clau_castrog",
-"CarolCBown",
-"raneumannb",
-"amorenoe",
-"barbararebolle",
-"PatyLabraB",
-"Margaritaleteli",
-"martinarrau",
-"LucianoErnest15",
-"rocicantuarias",
-"PaulinaVelosoM1",
-"cretton15",
-"ruth_uas",
-"angelica_tepper",
-"LMayolB",
-"felipemena_",
-"CeciliaUbilla",
-"HarryJurgensen",
-"Ktymontealegre",
-"geoconda_aysen",
-"RodrigoAlvarez_",
-"AlondraCVidal",
-"LidiaGonzlezCa2"
-) 
-#here we use rtweet to actually get the tweets
+usuarios3_constituyentes <- c(
+  "TiareHey",
+  "mdaza_abogado",
+  "PollyanaConsti1",
+  "AlvaroJofre",
+  "pablotoloza",
+  "rvega_c",
+  "ruggero_cozzi",
+  "arancibialmte",
+  "raulcelism",
+  "bdelamaza",
+  "arturozunigaj",
+  "cmonckeberg",
+  "tere_marinovic",
+  "berfontaine",
+  "conihube",
+  "HernanLarrain",
+  "mcubillossigall",
+  "ossandon_d12",
+  "Clau_castrog",
+  "CarolCBown",
+  "raneumannb",
+  "amorenoe",
+  "barbararebolle",
+  "PatyLabraB",
+  "Margaritaleteli",
+  "martinarrau",
+  "LucianoErnest15",
+  "rocicantuarias",
+  "PaulinaVelosoM1",
+  "cretton15",
+  "ruth_uas",
+  "angelica_tepper",
+  "LMayolB",
+  "felipemena_",
+  "CeciliaUbilla",
+  "HarryJurgensen",
+  "Ktymontealegre",
+  "geoconda_aysen",
+  "RodrigoAlvarez_",
+  "AlondraCVidal",
+  "LidiaGonzlezCa2"
+)
+#recolección de tuits de los tres listados con rtweet entre las fechas aproximadas especificadas. sin retweets.
 tuits_constituyentes1 <- get_timeline(usuarios1_constituyentes, n=2000, since_id =
-1411338373437050886, max_id = 1450105765881008130, include_rts = FALSE,retryonratelimit =
+"1411338373437050886", max_id = "1450105765881008130", include_rts = FALSE,retryonratelimit =
 TRUE)
 tuits_constituyentes2 <- get_timeline(usuarios2_constituyentes, n=2000, since_id =
-1411338373437050886, max_id = 1450105765881008130, include_rts = FALSE,retryonratelimit =
+"1411338373437050886", max_id = "1450105765881008130", include_rts = FALSE,retryonratelimit =
 TRUE)
 tuits_constituyentes3 <- get_timeline(usuarios3_constituyentes, n=2000, since_id =
-1411338373437050886, max_id = 1450105765881008130, include_rts = FALSE,retryonratelimit =
+"1411338373437050886", max_id = "1450105765881008130", include_rts = FALSE,retryonratelimit =
 TRUE)
-#join the groups
+#union de los tres listados
 tuits_constituyentes.df1 <- as.data.frame(tuits_constituyentes1)
-tuits_constituyentes.df1 <- subset (tuits_constituyentes.df1, select = user_id:text)
+tuits_constituyentes.df1 <- subset (tuits_constituyentes.df1, select = created_at:full_text)
 tuits_constituyentes.df2 <- as.data.frame(tuits_constituyentes2)
-tuits_constituyentes.df2 <- subset (tuits_constituyentes.df2, select = user_id:text)
+tuits_constituyentes.df2 <- subset (tuits_constituyentes.df2, select = created_at:full_text)
 tuits_constituyentes.df3 <- as.data.frame(tuits_constituyentes3)
-tuits_constituyentes.df3 <- subset (tuits_constituyentes.df3, select = user_id:text)
+tuits_constituyentes.df3 <- subset (tuits_constituyentes.df3, select = created_at:full_text)
 constituyentes.df1 <- rbind(tuits_constituyentes.df1, tuits_constituyentes.df2)
 constituyentes <- rbind(tuits_constituyentes.df3, constituyentes.df1)
-library(writexl)
-write_xlsx(constituyentes, "BBDD Constituyentes.xlsx")
-#Up here, all the tweets are ready. The next section shows the database filtering and cleaning according to the subject in question.
+#write_xlsx(constituyentes, "BBDD Constituyentes.xlsx") #si se quiere descargar. se puede seguir trabajando con el obj "constituyentes" o el excel recién creado
 
-#Database cleaning and filtering (removal of punctuation and filter by keywords)
-tuits_constituyentes <- read_excel("BBDD constituyentes.xlsx") #excel database upload - not necessary if the object is in the enviroment already.
-tuits_constituyentes.df <- as.data.frame(tuits_constituyentes) #to dataframe
+#Hasta acá, los tuits están listos. Ahora, limpieza (sacar puntuaciones, etc) y filtro de la bbdd (tuits referentes a la cc).
 
-#text cleaning
-#tweets.cons.df2 is the original dataframe, that will be overwritten
-tweets.cons.df2 <- tolower(tuits_constituyentes.df$text) #lowercase
-tweets.cons.df2 <- gsub("[[:punct:]]", "", tweets.cons.df2) #punctuation
-tweets.cons.df2 <- gsub("[[:digit:]]", "", tweets.cons.df2) #take numbers out
-tweets.cons.df2 <- gsub("\\s+", " ", str_trim(tweets.cons.df2)) #take extra spaces out
-tweets.cons.df2 <- gsub("http.*","",tweets.cons.df2)
-tweets.cons.df2 <- gsub("https.*","",tweets.cons.df2)#take links out
-tweets.cons.df2<- gsub("#\\w+","",tweets.cons.df2)
-tweets.cons.df2 <- gsub("@\\w+","",tweets.cons.df2)#take hashtags and users out
-tweets.cons.df2 <- gsub("\\w*[0-9]+\\w*\\s*", "",tweets.cons.df2)#take text with numbers out
-tweets.cons.df2 <- gsub("[^\x20-\x7E,á,é,í,ó,ú,ñ]", "", tweets.cons.df2) #take emojis out, keep ascii + extended ascii 
-#View(tweets.cons.df2)
+tweets.df <- as.data.frame(constituyentes)
+
+#limpieza
+tweets.df$full_text <- tolower(tweets.df$full_text) #minuscula
+tweets.df$full_text <- gsub("[[:punct:]]", "", tweets.df$full_text) #puntuacion
+tweets.df$full_text <- gsub("[[:digit:]]", "", tweets.df$full_text) #numeros/digitos
+tweets.df$full_text <- gsub("\\s+", " ", str_trim(tweets.df$full_text)) #espacios extra
+tweets.df$full_text <- gsub("http.*","",tweets.df$full_text)
+tweets.df$full_text <- gsub("https.*","",tweets.df$full_text)#links
+tweets.df$full_text <- gsub("#\\w+","",tweets.df$full_text)
+tweets.df$full_text <- gsub("@\\w+","",tweets.df$full_text)#hashtags
+tweets.df$full_text <- gsub("\\w*[0-9]+\\w*\\s*", "",tweets.df$full_text)#texto con numeros
+tweets.df$full_text <- gsub("[^\x20-\x7E,á,é,í,ó,ú,ñ]", "", tweets.df$full_text) #emojis, mantiene ascii + ascii extendido necesario
+#View(tweets.df)
+
 #library(writexl)
-#bbddlimpia.cons.df <- as.data.frame(tweets.cons.df2) #if you want to donwload
+#bbddlimpia.cons.df <- as.data.frame(tweets.cons.df2) #si se quiere descargar
 #write_xlsx(bbddlimpia.cons.df,"BBDD Constituyentes texto limpio.xlsx")
-tweets.cons.df2 <- as.data.frame(tweets.cons.df2)
-BBDD_constituyentes<- cbind(tweets.cons.df2,tuits_constituyentes.df)
-#View(BBDD_constituyentes)
-#spanishkeyword filter
-BBDD_constituyentes_filtrada <- BBDD_constituyentes %>%
-filter(str_detect(tweets.cons.df2,
-"convencionconstitucional|convenciónconstitucional|convención|convencion|constitucional|constitu
+
+#filtro palabras clave para limitar temáticamente
+BBDD <- tweets.df %>% 
+  filter(str_detect(full_text, "convencionconstitucional|convenciónconstitucional|convención|convencion|constitucional|constitu
 yentes|constituyente|convencionconstituyente|
 convenciónconstituyente|nuevaconstitucion|nuevaconstitución|nueva constitución|nueva
 constitucion|constitución|constitucion|proceso constituyente|procesoconstituyente|convención
@@ -238,8 +231,65 @@ constitucional|reforma
 constitucional|convencioncl|convencióncl|convencionales|constitucionales|chileconstitucion|chileco
 nstitución|proceso constitucional|chileconstituyente|chileconvencion|chileconvención|chile
 constituyente|reformaconstitucional")) %>%
-filter(!grepl("acusación constitucional",tweets.cons.df)) %>%
-filter(!grepl("tribunal constitucional",tweets.cons.df))
-#write_xlsx(BBDD_constituyentes_filtrada, "BBDD filtrada Constituyentes.xlsx") #download in excel
+  filter(!grepl("acusación constitucional",full_text)) %>%
+  filter(!grepl("tribunal constitucional",full_text))
 
-#emotion analyisis with luke
+#análisis de emociones con liwc
+liwcdict <- dictionary(file = "path diccionario",
+                       format = "LIWC")
+
+corpus <- corpus(BBDD$full_text) #dataframe a corpus
+corpus_tokenizado <- tokens(corpus, what = "word") #sin más argumentos pq limpiamos antes
+
+dfm <- dfm(corpus_tokenizado, remove = stopwords("spanish"))
+
+liwcdfm <- dfm_lookup(dfm, dictionary = liwcdict) 
+
+liwcdfm.df <- as.data.frame(liwcdfm)
+
+liwcdfm.df <- select(liwcdfm.df, c(Afect, EmoPos, EmoNeg))#columnas de interés
+
+liwcdfm.df <- cbind(BBDD,liwcdfm.df)
+
+#tokenizar para el WC
+toks <- quanteda::tokens(corpus_tokenizado, split_hyphens = TRUE)
+# WC (word count)
+WC <- quanteda::ntoken(toks)
+liwcdfm.df <- cbind(liwcdfm.df,WC)
+liwcdfm.df <- liwcdfm.df %>% 
+  relocate(WC, .before=Afect) |> 
+  select(-c(id))
+View(liwcdfm.df)#hasta acá, análisis de emociones con puntuaciones listo
+#write_xlsx(liwcdfm.df, "Puntuacion LIWC Constituyentes.xlsx")
+
+#análisis de emociones porcentual por semana
+#eliminar hora en created_at
+liwcdfm.df <- liwcdfm.df |> 
+  separate(created_at,sep = " ",into = c("created_at","eliminar")) |> 
+  select(-c("eliminar"))
+
+liwcdfm.df$week_num <- strftime(liwcdfm.df$created_at, format = "%V")
+
+datos_semanales_WC <- liwcdfm.df %>%
+  group_by(week_num) %>%
+  summarize(WC = sum(WC))
+datos_semanales_Afect <- liwcdfm.df %>%
+  group_by(week_num) %>%
+  summarize(Afect = sum(Afect))
+datos_semanales_EmoPos <- liwcdfm.df %>%
+  group_by(week_num) %>%
+  summarize(EmoPos = sum(EmoPos))
+datos_semanales_EmoNeg <- liwcdfm.df %>%
+  group_by(week_num) %>%
+  summarize(EmoNeg = sum(EmoNeg))
+
+datos_semanales_a <- left_join(datos_semanales_WC,datos_semanales_Afect)
+datos_semanales_b <-  left_join(datos_semanales_EmoPos,datos_semanales_EmoNeg)
+datos_semanales <- left_join(datos_semanales_a,datos_semanales_b)
+
+datos_semanales <- datos_semanales |> 
+  mutate(Afect_por = (Afect*100)/WC) |> 
+  mutate(EmoPos_por = (EmoPos*100)/WC) |> 
+  mutate(EmoNeg_por = (EmoNeg*100)/WC)
+
+
