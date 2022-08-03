@@ -292,4 +292,11 @@ datos_semanales <- datos_semanales |>
   mutate(EmoPos_por = (EmoPos*100)/WC) |> 
   mutate(EmoNeg_por = (EmoNeg*100)/WC)
 
+#graficar
+plot <- ggplot(datos_semanales, aes(x = week_num)) + 
+  geom_line(aes(y = EmoPos_por, color = 'EmoPos',group=1)) + 
+  geom_line(aes(y = EmoNeg_por, color = 'EmoNeg',group=2))
 
+
+library(plotly)
+ggplotly(plot)
