@@ -113,6 +113,10 @@ nrcsum <- nrcsum |>
   mutate(Positive_por = (Positive)/WC) |> 
   mutate(Negative_por = (Negative)/WC) 
 
+#descargar archivo proporción diaria emolex
+write.csv(nrcsum, "Analisis emociones Emolex.csv") #csv
+library(writexl)
+write_xlsx(nrcsum, "Analisis emociones Emolex.xlsx") #excel
 
 library(scales)#especificar %s
 # nrcsum$Positive_por  <- round(nrcsum$Positive_por, digits = 2)
